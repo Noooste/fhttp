@@ -48,6 +48,14 @@ func (h Header) Add(key, value string) {
 	textproto.MIMEHeader(h).Add(key, value)
 }
 
+// Append adds the Key, value pair to the header by also appending the key to the header order.
+// It appends to any existing Values associated with Key.
+// The Key is case insensitive; it is canonicalized by
+func (h Header) Append(key, value string) {
+	textproto.MIMEHeader(h).Add(key, value)
+	textproto.MIMEHeader(h).Add(HeaderOrderKey, strings.ToLower(key))
+}
+
 // Set sets the header entries associated with Key to the
 // single element value. It replaces any existing Values
 // associated with Key. The Key is case insensitive; it is
