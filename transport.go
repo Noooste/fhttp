@@ -586,13 +586,13 @@ func (t *Transport) roundTrip(req *Request) (*Response, error) {
 			req.closeBody()
 			return nil, err
 		}
-
 		var resp *Response
 		if pconn.alt != nil {
 			// HTTP/2 path.
 			t.setReqCanceler(cancelKey, nil) // not cancelable with CancelRequest
 			resp, err = pconn.alt.RoundTrip(req)
 		} else {
+			req.Header.Del("PHeader-Order:")
 			resp, err = pconn.roundTrip(treq)
 		}
 		if err == nil {
