@@ -301,6 +301,8 @@ type Request struct {
 	// This field is ignored by the HTTP client.
 	TLS *tls.ConnectionState
 
+	TLSConn net.Conn
+
 	// Cancel is an optional channel whose closure indicates that the client
 	// request should be regarded as canceled. Not all implementations of
 	// RoundTripper may support Cancel.
