@@ -459,10 +459,13 @@ func getH2HeaderBytes(r *http.Request, maxHeaderTableSize uint32) ([]byte, error
 		if isNonH2Header(header) {
 			continue
 		}
+
+		sensitive := isSensitive(header, r.SensitiveHeaders)
 		for _, v := range values {
 			err := hpackEnc.WriteField(hpack.HeaderField{
-				Name:  strings.ToLower(header),
-				Value: v,
+				Name:      strings.ToLower(header),
+				Value:     v,
+				Sensitive: sensitive,
 			})
 			if err != nil {
 				return nil, err
@@ -491,5 +494,15 @@ func isNonH2Header(header string) bool {
 			return true
 		}
 	}
+	return false
+}
+
+func isSensitive(name string, l []string) bool {
+	for _, v := range l {
+		if strings.EqualFold(name, v) {
+			return true
+		}
+	}
+
 	return false
 }

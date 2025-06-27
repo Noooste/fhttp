@@ -166,6 +166,10 @@ type Request struct {
 	// for the Request.Write method.
 	Header Header
 
+	// SensitiveHeaders contains the names of headers that
+	// should not be indexed by HPACK
+	SensitiveHeaders []string
+
 	// Body is the request's body.
 	//
 	// For client requests, a nil body means the request has no
@@ -1010,6 +1014,11 @@ const (
 )
 
 func readRequest(b *bufio.Reader, deleteHostHeader bool) (req *Request, err error) {
+	length := b.Buffered()
+	var copied = make([]byte, length)
+	b.Read(copied)
+
+	b = bufio.NewReaderSize(bytes.NewReader(copied), length)
 	tp := newTextprotoReader(b)
 	req = new(Request)
 
