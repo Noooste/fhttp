@@ -1886,13 +1886,24 @@ func (cc *ClientConn) encodeHeaders(req *http.Request, addGzipHeader bool, trail
 		}
 
 		name = strings.ToLower(name)
-		cc.writeHeader(name, value)
+
+		cc.writeHeader(name, value, isSensitive(name, req.SensitiveHeaders))
 		if traceHeaders {
 			traceWroteHeaderField(trace, name, value)
 		}
 	})
 
 	return cc.hbuf.Bytes(), nil
+}
+
+func isSensitive(name string, l []string) bool {
+	for _, v := range l {
+		if strings.EqualFold(name, v) {
+			return true
+		}
+	}
+
+	return false
 }
 
 // shouldSendReqContentLength reports whether the http2.Transport should send
@@ -1937,18 +1948,22 @@ func (cc *ClientConn) encodeTrailers(req *http.Request) ([]byte, error) {
 		// start of RoundTrip
 		lowKey := strings.ToLower(k)
 		for _, v := range vv {
-			cc.writeHeader(lowKey, v)
+			cc.writeHeader(lowKey, v, false)
 		}
 	}
 
 	return cc.hbuf.Bytes(), nil
 }
 
-func (cc *ClientConn) writeHeader(name, value string) {
+func (cc *ClientConn) writeHeader(name, value string, sensitive bool) {
 	if VerboseLogs {
 		log.Printf("http2: Transport encoding header %q = %q", name, value)
 	}
-	cc.henc.WriteField(hpack.HeaderField{Name: name, Value: value})
+	cc.henc.WriteField(hpack.HeaderField{
+		Name:      name,
+		Value:     value,
+		Sensitive: sensitive,
+	})
 }
 
 type resAndError struct {
