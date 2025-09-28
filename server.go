@@ -3461,6 +3461,9 @@ func (h initALPNRequest) ServeHTTP(rw ResponseWriter, req *Request) {
 		req.TLS = &tls.ConnectionState{}
 		*req.TLS = h.c.ConnectionState()
 	}
+	if req.TLSConn == nil {
+		req.TLSConn = h.c
+	}
 	if req.Body == nil {
 		req.Body = NoBody
 	}

@@ -2108,6 +2108,7 @@ func (sc *serverConn) newWriterAndRequestNoBody(st *stream, rp requestParam) (*r
 		Proto:      "HTTP/2.0",
 		ProtoMajor: 2,
 		ProtoMinor: 0,
+		TLSConn:    sc.conn.(*tls.Conn),
 		TLS:        tlsState,
 		Host:       rp.authority,
 		Body:       body,
